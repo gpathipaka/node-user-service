@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
 
 const userSchema = mongoose.Schema({
     firstName: {
@@ -52,9 +53,9 @@ const userSchema = mongoose.Schema({
 
 userSchema.pre('save', async function (next) {
     const user = this
-    if (user.isModified('password'))  {
-        console.log('PRE>>>>>>>>', user.email)
-    } 
+    if (user.isModified('password')) {
+        user.password = await bcrypt.hash(user.password, 8)
+    }
     next()
 })
 
@@ -73,6 +74,18 @@ userSchema.methods.toJSON = function () {
     delete userObject.tokens
 
     return userObject
+}
+
+userSchema.statics.findByCrendentials = async function(email, password) {
+    const user = await User.findOne({email})
+    if (!user) {
+        throw new Error('Sorry!! Unable to login......')
+    }
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) {
+        throw new Error('Sorry!! Unable to login......')
+    }
+    return user
 }
 
 const User = mongoose.model('User', userSchema)
