@@ -18,3 +18,28 @@ def lambda_handler(event, context):
               
     
     print('*'*50)
+######UNZIP Data##########
+import json
+import boto3
+import zipfile
+s3 = boto3.resource('s3')
+import io
+
+def lambda_handler(event, context):
+    print('@'*50)
+    for record in event['Records']:
+        bucket = record['s3']['bucket']['name']
+        key = record['s3']['object']['key']
+        zip_obj = s3.Object(bucket, key)
+        buffer = io.BytesIO(zip_obj.get()['Body'].read())
+        z = zipfile.ZipFile(buffer)
+        print(z)
+        with zipfile.ZipFile(buffer, "r") as z:
+            for fileName in z.namelist():
+                print('File name ', fileName)
+                with z.open(fileName) as f:
+                    data = f.read()
+                    d = json.loads(data.decode("utf-8"))
+                    print('Data', d)
+        
+    print('*'*50)
