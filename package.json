@@ -27,6 +27,6 @@
     "jest": "^24.9.0",
     "nodemon": "^2.0.1",
     "supertest": "^4.0.2",
-    "validator": "^12.1.0"
+    "validator": "^13.7.0"
   }
 }
